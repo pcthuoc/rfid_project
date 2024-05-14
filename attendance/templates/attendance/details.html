@@ -1,0 +1,49 @@
+{% extends 'attendance/basic.html' %}
+
+{% block title %}User Details{% endblock %}
+
+{% block body %}
+<div class="container-fluid text-center">
+  <br>
+  <h1 class="mt-4">Danh sách sinh viên</h1>
+  <br>
+  <div class="table-responsive" style="height: 100%;">
+    <table class="table">
+      <thead class="table-dark">
+        <TR>
+          <th scope="col">#</th>
+          <th scope="col">Card ID</TH>
+          <th scope="col">Họ tên</TH>
+          <th scope="col">Số điện thoại</TH>
+          <th scope="col">Mã sinh viên</TH>
+          <th scope="col">Giới tính</TH>
+            
+        </TR>
+      </thead>
+      <tbody id="userdetails" class="userdetails">
+      </tbody>
+    </table>
+  </div>
+  {% endblock body %}
+
+  {% block js %}
+  <script>
+
+    $(document).ready(function () {
+
+      loadData();
+
+
+      setInterval(loadData, 3000);
+    });
+
+    function loadData() {
+      $.ajax({
+        url: "{% url 'details1' %}"
+      }).done(function (data) {
+        $('#userdetails').html(data);
+      });
+    }
+
+  </script>
+  {% endblock js %}

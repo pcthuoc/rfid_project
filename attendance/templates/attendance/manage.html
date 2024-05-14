@@ -1,0 +1,300 @@
+{% extends 'attendance/basic.html' %}
+
+{% block title %}Manage users{% endblock %}
+
+{% block body %}
+<div class="d-flex">
+    <div>
+        <h1 class="mt-4">Quản lý sinh viên</h1>
+    </div>
+    <div class="ms-auto mt-4">
+        <button type="button " class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#CreateFormModal"
+            id="CreateDevice">
+            Add Card ID
+        </button>
+    </div>
+</div>
+
+
+<hr>
+<div class="container-fluid text-center">
+    <br>
+    <h1 class="mt-4">Danh sách sinh viên</h1>
+    <br>
+    <div class="table-responsive" style="height: 100%;">
+        <table class="table">
+            <thead class="table-dark">
+                <TR>
+                    <th scope="col">#</th>
+                    <th scope="col">Card ID</TH>
+                    <th scope="col">Họ tên</TH>
+                    <th scope="col">Số điện thoại</TH>
+                    <th scope="col">Mã sinh viên</TH>
+                    <th scope="col">Giới tính</TH>
+                    <th scope="col">Chỉnh sửa </TH>
+
+                </TR>
+            </thead>
+            <tbody id="manage" class="manage">
+
+                {% for user in users %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ user.card_id }}</td>
+                    <td>{{ user.name|default:"None" }}</td>
+                    <td>{{ user.phone|default:"None" }}</td>
+                    <td>{{ user.masv|default:"None" }}</td>
+                    <td>
+                        {% if user.sex == "male" %}
+                        Nam
+                        {% elif user.sex == "female" %}
+                        Nữ
+                        {% else %}
+                        Khác
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="edit-btn btn btn-primary btn-xs" type="button"
+                            data-user-card-id="{{ user.card_id }}" data-user-name="{{ user.name }}"
+                            data-user-masv="{{ user.masv }}" data-user-phone="{{ user.phone }}"
+                            data-user-sex="{{ user.sex }}" data-user-email="{{ user.email }}"
+                            data-user-birth_date="{{ user.birth_date }}">Edit</button>
+                        <button class="btn btn-danger btn-xs" type="button"
+                            onclick="removeItem('{{ user.card_id }}')">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+
+
+        </table>
+    </div>
+</div>
+
+
+<!-- Create Modal -->
+<div class="modal fade" id="CreateFormModal" tabindex="-1" aria-labelledby="FormModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="FormModalLabel">Thêm sinh viên mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="create-form" action="{% url 'cardadd' %}" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Họ tên:</label>
+                        <input type="text" class="form-control" name="name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Card ID:</label>
+                        <input type="text" class="form-control" name="card_id">
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Mã sinh viên:</label>
+                        <input type="text" class="form-control" name="masv">
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Số điện thoại:</label>
+                        <input type="text" class="form-control" name="phone">
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Email:</label>
+                        <input type="text" class="form-control" name="email">
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Ngày sinh:</label>
+                        <input type="date" class="form-control" name="birth_date">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="gender" class="col-form-label">Giới tính:</label>
+                        <select class="form-select" name="sex">
+                            <option value="male">Nam</option>
+                            <option value="female">Nữ</option>
+                            <option value="other">Khác</option>
+                        </select>
+                    </div>
+            </div>
+            <div class="modal-footer" id="ModalFooter">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="submit" class="btn btn-warning">Thêm</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<!-- Edit Modal -->
+<div class="modal fade" id="EditFormModal" tabindex="-1" aria-labelledby="FormModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="FormModalLabel">Create Form</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="dit-form" action="{% url 'cardedit' %}" method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Họ tên:</label>
+                        <input type="text" class="form-control" name="name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Card ID:</label>
+                        <input type="text" class="form-control" name="card_id">
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Mã sinh viên:</label>
+                        <input type="text" class="form-control" name="masv">
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Số điện thoại:</label>
+                        <input type="text" class="form-control" name="phone">
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Email:</label>
+                        <input type="text" class="form-control" name="email">
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Ngày sinh:</label>
+                        <input type="date" class="form-control" name="birth_date">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="gender" class="col-form-label">Giới tính:</label>
+                        <select class="form-select" name="sex">
+                            <option value="male">Nam</option>
+                            <option value="female">Nữ</option>
+                            <option value="other">Khác</option>
+                        </select>
+                    </div>
+
+
+            </div>
+            <div class="modal-footer" id="ModalFooter">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-warning">Update</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+<!-- Đoạn mã JavaScript -->
+
+
+{% block js %}
+
+
+<!-- Đoạn mã JavaScript -->
+<script>
+$(document).ready(function () {
+        // Hàm tiền xử lý khi nhấn nút "Thêm"
+        function handleSubmit() {
+            // Lấy giá trị từ các trường input
+            var name = $('input[name="name"]').val();
+            var card_id = $('input[name="card_id"]').val();
+            var masv = $('input[name="masv"]').val();
+            var phone = $('input[name="phone"]').val();
+            var email = $('input[name="email"]').val();
+            var birth_date = $('input[name="birth_date"]').val();
+            var sex = $('select[name="sex"]').val();
+            
+            // Kiểm tra xem các trường có rỗng không
+            if (!name || !card_id || !masv || !phone || !email || !birth_date || !sex) {
+                // Hiển thị modal thông báo lỗi
+                $('#errorModalBody').text('Vui lòng điền đầy đủ thông tin.');
+                $('#errorModal').modal('show');
+                return false; // Ngăn chặn hành động mặc định của form
+            }
+            
+            // Nếu không có lỗi, tiếp tục thực hiện hành động mặc định của form
+            return true;
+        }
+        
+        // Gắn hàm handleSubmit vào sự kiện khi nhấn nút "Thêm"
+        $('#create-button').click(function() {
+            return handleSubmit();
+        });
+    });
+
+    const csrftoken = "{{ csrf_token }}";
+    $(document).ready(function () {
+
+        $('.edit-btn').click(function () {
+
+            var cardId = $(this).data('user-card-id');
+            var name = $(this).data('user-name');
+            var masv = $(this).data('user-masv');
+            var phone = $(this).data('user-phone');
+            var sex = $(this).data('user-sex');
+            var email = $(this).data('user-email');
+            console.log(email);
+            var birth_date = $(this).data('user-birth_date');
+
+            // Gọi hàm để điền dữ liệu vào form chỉnh sửa
+            fillEditForm(cardId, name, masv, phone, sex, email, birth_date);
+            // Mở modal chỉnh sửa
+            $('#EditFormModal').modal('show');
+        });
+
+        // Hàm điền dữ liệu vào form chỉnh sửa
+        function fillEditForm(cardId, name, masv, phone, sex, email, birth_date) {
+    // Điền dữ liệu vào các trường nhập của form chỉnh sửa
+    $('#EditFormModal').find('input[name="card_id"]').val(cardId);
+    $('#EditFormModal').find('input[name="name"]').val(name === 'None' ? '' : name);
+    $('#EditFormModal').find('input[name="masv"]').val(masv === 'None' ? '' : masv);
+    $('#EditFormModal').find('input[name="phone"]').val(phone === 'None' ? '' : phone);
+    $('#EditFormModal').find('select[name="sex"]').val(sex === 'None' ? '' : sex);
+    $('#EditFormModal').find('input[name="email"]').val(email === 'None' ? '' : email);
+    
+    // Kiểm tra giá trị của birth_date trước khi chuyển đổi
+    if (birth_date && birth_date !== 'None') {
+        var birthDate = new Date(birth_date);
+        // Định dạng lại ngày tháng theo yêu cầu của trường input type="date"
+        var formattedBirthDate = birthDate.toISOString().split('T')[0];
+        $('#EditFormModal').find('input[name="birth_date"]').val(formattedBirthDate);
+    } else {
+        // Nếu birth_date là None, không cần thực hiện việc chuyển đổi
+        // Bạn có thể thực hiện xử lý khác tại đây nếu cần
+        console.log('Ngày sinh không có hoặc không hợp lệ');
+    }
+}
+
+    });
+    function removeItem(id) {
+        if (confirm(`Bạn có muốn xóa thẻ với mã ${id}`)) {
+            fetch(`/card-delete/${id}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        // Xử lý khi xóa thành công, ví dụ: load lại dữ liệu
+                        location.reload();
+                    } else {
+                        throw new Error('Có lỗi xảy ra khi xóa thẻ.');
+                    }
+                })
+                .catch(error => {
+                    alert(error.message);
+                });
+        }
+
+    }
+
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'attendance/basic.html' %}
+
+{% block title %}Attendance Home{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid text-center">
+  <br>
+  <h1 class="mt-4">Danh sách điểm danh</h1>
+  <br>
+  <div class="table-responsive" style="height: 100%;">
+    <table class="table">
+      <thead class="table-dark">
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Họ tên</th>
+          <th scope="col">CardID</th>
+          <th scope="col">Số điện thoại</th>
+          <th scope="col">Mã sinh viên</th>
+          <th scope="col">Thời gian checkin</th>
+          <th scope="col">Thời gian checkout</th>
+        </tr>
+      </thead>
+      <tbody id="cards" class="cards">
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+{% block js %}
+<script>
+  $(document).ready(function () {
+    const socket = new WebSocket('ws://localhost:8000/ws/notifications/');
+
+    socket.onmessage = function (event) {
+      const data = JSON.parse(event.data);
+      console.log('Notification:', data.message);
+      // Cập nhật dữ liệu trang HTML khi nhận được thông báo
+      loadData();
+    };
+
+    socket.onopen = function (event) {
+      console.log('WebSocket connected');
+    };
+
+    socket.onclose = function (event) {
+      console.log('WebSocket closed');
+    };
+
+    socket.onerror = function (error) {
+      console.log('WebSocket error:', error);
+    };
+
+    // Hàm tải dữ liệu ban đầu
+    function loadData() {
+      $.ajax({
+        url: "{% url 'index1' %}"
+      }).done(function (data) {
+        $('#cards').html(data);
+      });
+    }
+
+    // Tải dữ liệu ngay khi trang được tải lần đầu tiên
+    loadData();
+  });
+</script>
+{% endblock %}

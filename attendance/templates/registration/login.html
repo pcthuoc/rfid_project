@@ -1,0 +1,49 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đồ án</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+    <script src="https://kit.fontawesome.com/64d58efce2.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="forms-container">
+            <div class="signin-signup">
+               
+                <form action="/login/" method="post" class="form-signin">
+                    <h2 class="title">Đăng nhập</h2>
+                    {% csrf_token %}
+                    <div class="input-field">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="id_username" name="username" placeholder="Username" />
+                    </div>
+                    <div class="input-field">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="id_password" name="password" placeholder="Password" />
+                    </div>
+                    <button class="btn btn-lg btn-primary btn-block text-uppercase" type="submit">Đăng nhập</button>
+                    <hr class="my-4">
+                </form>
+                
+                
+            </div>
+        </div>
+        <div class="panels-container">
+            <div class="panel left-panel">
+                <div class="content">
+                    <h3 style="font-size: 40px;">Đồ án tốt nghiệp</h3>
+                    <p style="font-size: 30px;">Điểm danh sinh viên bằng RFID</p>
+                </div>
+                
+               
+            </div>
+           
+        </div>
+    </div>
+    <script src="{% static 'app.js' %}"></script>
+</body>
+</html>

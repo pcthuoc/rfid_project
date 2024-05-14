@@ -1,0 +1,27 @@
+    {% for user in users %}
+    {% if user.id %}
+    <TR>
+        <td>{{ forloop.counter }}</td>
+        <TD>{{ user.card_id}}</TD>
+        {% if user.name %}
+        <TD>{{ user.name}}</TD>
+        <TD>{{ user.phone}}</TD>
+        <TD>{{ user.masv}}</TD>
+        <TD>
+            {% if user.sex == "male" %}
+                Nam
+            {% elif user.sex == "female" %}
+                Nữ
+            {% else %}
+                Khác
+            {% endif %}
+        </TD>
+        
+        {% else %}
+        <TD></TD>
+        <TD></TD>
+        <TD></TD>
+        {% endif %}
+    </TR>
+    {% endif %}
+    {% endfor %}

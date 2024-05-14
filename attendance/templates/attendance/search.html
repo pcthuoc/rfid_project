@@ -1,0 +1,79 @@
+{% extends 'attendance/basic.html' %}
+
+{% block title %}Search User{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid" style="margin-bottom: 100px;">
+  <div class="row" style="margin-top: 50px;">
+    <div class="col-7 my-2">
+      <div class="card"style="margin-bottom: 200px;">
+        <div class="card-header bg-dark text-white" style="margin-bottom: 10px;">
+          <h5 class="card-title">Thông tin thẻ sinh viên</h5>
+      </div>
+      
+      
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>ID thẻ:</strong> {{ use.card_id }}</p>
+                    <p><strong>Tên:</strong> {{ use.name }}</p>
+                    <p><strong>Mã sinh viên:</strong> {{ use.masv }}</p>
+                    <p><strong>Số điện thoại:</strong> {{ use.phone }}</p>
+                </div>
+                <div class="col-md-6">
+                  <p><strong>Giới tính:</strong>
+                    {% if use.sex == "male" %}
+                        Nam
+                    {% elif use.sex == "female" %}
+                        Nữ
+                    {% else %}
+                        Khác
+                    {% endif %}
+                </p>
+                
+                    <p><strong>Email:</strong> {{ use.email }}</p>
+                    <p><strong>Ngày sinh:</strong> {{ use.birth_date }}</p>
+                </div>
+            </div>
+           
+        </div>
+    </div>
+    
+    </div>
+    <div class="col-5 text-center">
+      <br>
+      <h1 class="mt-4">Lịch sử điểm danh</h1>
+      <br>
+      <div class="table-responsive" style="height: 100%;">
+     
+
+        <table class="table">
+          <thead class="table-dark">
+            <tr>
+              <th>Ngày</th>
+              <th>Thời gian checkin</th>
+              <th>Thời gian checkout</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for entry in log %}
+            <tr>
+              <td>{{ entry.date }}</td>
+              <td>{{ entry.time_in }}</td>
+              {% if entry.time_out %}
+            <td>{{ entry.time_out }}</td>
+            {% else %}
+            <td>&nbsp;</td> <!-- Giá trị trống -->
+            {% endif %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

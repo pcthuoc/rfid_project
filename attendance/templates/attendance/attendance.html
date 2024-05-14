@@ -1,0 +1,15 @@
+    {% for user in log %}
+    <TR>
+        <TD>{{ user.ida}}</TD>
+        <TD>{{ user.name}}</TD>
+        <TD>{{ user.card_id}}</TD>
+        <TD>{{ user.phone}}</TD>
+        <TD>{{ user.masv}}</TD>
+        <TD>{{ user.time_in}}</TD>
+        {% if user.time_out %}
+            <td>{{ user.time_out }}</td>
+            {% else %}
+            <td>&nbsp;</td> <!-- Giá trị trống -->
+            {% endif %}
+        </TR>
+    {% endfor %}
