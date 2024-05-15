@@ -23,77 +23,73 @@ def index1(request):
 def index(request):
     logs = Log.objects.order_by('date')  # Sắp xếp theo thời gian vào
     return render(request, 'attendance/index.html', {'logs': logs})
+from django.http import JsonResponse
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 def process(request):
-	card = request.GET.get('card_id', None)
-	users = Student.objects.all()
-	for user in users:
-		if user.card_id == int(card):
-			ans = attend(user)
-			channel_layer = get_channel_layer()
-			async_to_sync(channel_layer.group_send)(
-        'notifications',  # Tên nhóm (group) để gửi thông báo
-        {
-            'type': 'send_notification',  # Loại thông báo
-            'message': "ghiihihih"  # Nội dung thông báo
-        }
-    )
+    card = request.GET.get('card_id', None)
+    users = Student.objects.filter(card_id=int(card))
 
-			return HttpResponse(ans)
-
-	new_student = Student(card_id=card)
-	new_student.save()
-	return HttpResponse('Dữ liệu trống đã tiến hành đăng ký CardID')
+    if users.exists():
+        user = users.first()
+        status, masv = attend(user)
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            'notifications',  # Tên nhóm (group) để gửi thông báo
+            {
+                'type': 'send_notification',  # Loại thông báo
+                'message': "ghiihihih"  # Nội dung thông báo
+            }
+        )
+        return JsonResponse({'status': status, 'maSV': masv})
+    else:
+        new_student = Student(card_id=card)
+        new_student.save()
+        return JsonResponse({'status': 'register_done', 'maSV': None})
 
 def attend(user):
-	status =[]
-	if user.name is None:
-		return 'Vui lòng liên hệ quản trị viên để cập nhật thông tin'
-	logs = Log.objects.filter(card_id=user.card_id).order_by('-ida')
-	
-	if len(logs) == 0:
-		size_Log = Log.objects.count()
-		new_log, created = Log.objects.update_or_create(
-    			card_id=user.card_id,
-    			date=datetime.datetime.now().date(),
-				time_in=datetime.datetime.now(),
-				defaults={
-					'ida': size_Log,
-					'name': user.name,
-					'phone': user.phone,
-					'masv': user.masv,
-					'time_out': None,
-				}
-			)	
-		status =['check in',user]
-	else:
-		first_log = logs.first()
-		if first_log.time_out is None:
-			first_log.time_out = datetime.datetime.now()
-			first_log.save()
-			status =['check out',user]
-		else:
-			size_Log = Log.objects.count()
-			new_log, created = Log.objects.update_or_create(
-    			card_id=user.card_id,
-    			date=datetime.datetime.now().date(),
-				time_in=datetime.datetime.now(),
-				defaults={
-					'ida': size_Log,
-					'name': user.name,
-					'phone': user.phone,
-					'masv': user.masv,
-					'time_out': None,
-				}
-			)
-			status =['check in',user]			
-
-
-	return status
-
-
-
-
+    if user.name is None:
+        return 'add_infor', None
+    
+    logs = Log.objects.filter(card_id=user.card_id).order_by('-ida')
+    
+    if len(logs) == 0:
+        size_Log = Log.objects.count()
+        new_log, created = Log.objects.update_or_create(
+            card_id=user.card_id,
+            date=datetime.datetime.now().date(),
+            time_in=datetime.datetime.now(),
+            defaults={
+                'ida': size_Log,
+                'name': user.name,
+                'phone': user.phone,
+                'masv': user.masv,
+                'time_out': None,
+            }
+        )
+        return 'check_in', user.masv
+    else:
+        first_log = logs.first()
+        if first_log.time_out is None:
+            first_log.time_out = datetime.datetime.now()
+            first_log.save()
+            return 'check_out', user.masv
+        else:
+            size_Log = Log.objects.count()
+            new_log, created = Log.objects.update_or_create(
+                card_id=user.card_id,
+                date=datetime.datetime.now().date(),
+                time_in=datetime.datetime.now(),
+                defaults={
+                    'ida': size_Log,
+                    'name': user.name,
+                    'phone': user.phone,
+                    'masv': user.masv,
+                    'time_out': None,
+                }
+            )
+            return 'check_in', user.masv
 
 
 def details1(request):
