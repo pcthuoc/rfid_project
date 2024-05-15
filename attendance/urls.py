@@ -30,6 +30,7 @@ urlpatterns = [
     path('cardedit/', views.edit , name = 'cardedit'),
     path('download-excel/', views.download_student_data, name='download_excel'),
     path('cardadd/', views.add , name = 'cardadd'),
+    path('upload-excel/', views.upload_excel, name='upload_excel'),
     path("card-id/<int:pk>/",views.CardUidDetailApiView,name="card-uid-Detail"),
     path("card-delete/<int:pk>/",views.delete,name="card-delete"),
     path('searchuser/', views.search , name = 'search'),

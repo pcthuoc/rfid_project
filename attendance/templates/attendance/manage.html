@@ -338,40 +338,55 @@
             });
         });
     });
-    $(document).ready(function () {
-        // Sự kiện nghe khi tệp được chọn
-        $('#fileInput').change(function (event) {
-            // Đọc tệp khi có sự thay đổi
-            handleFile(event.target.files[0]);
+    // Thêm sự kiện cho nút "Upload"
+$('#uploadForm').submit(function (event) {
+    event.preventDefault(); // Ngăn chặn hành động mặc định của form
+
+    // Lấy dữ liệu từ trường input file
+    var file = $('#fileInput')[0].files[0];
+
+    // Xử lý tệp được chọn
+    handleFile(file);
+});
+
+// Sự kiện nghe khi trường input tệp thay đổi
+$('#fileInput').change(function (event) {
+    // Đọc tệp khi có sự thay đổi
+    handleFile(event.target.files[0]);
+});
+
+// Đoạn mã JavaScript tiếp theo (processData, etc.) vẫn được giữ nguyên
+
+document.getElementById('fileInput').addEventListener('change', function(event) {
+        // Lấy tệp đã chọn
+        var file = event.target.files[0];
+        
+        // Tạo một FormData object để chứa dữ liệu của form
+        var formData = new FormData();
+        // Thêm tệp đã chọn vào FormData object
+        formData.append('file', file);
+
+        // Sử dụng fetch API để gửi yêu cầu POST đến máy chủ với dữ liệu FormData
+        fetch('/upload-excel/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.text(); // hoặc response.json() nếu server trả về JSON
+            } else {
+                throw new Error('Có lỗi xảy ra khi upload tệp.');
+            }
+        })
+        .then(data => {
+            // Hiển thị kết quả từ server trong phần tử có id là "resultTableContainer"
+            document.getElementById('resultTableContainer').innerHTML = data;
+        })
+        .catch(error => {
+            // Xử lý lỗi nếu có
+            console.error('Error:', error);
         });
     });
-    function processData(data) {
-        // Split dữ liệu thành các hàng
-        var rows = data.split('\n');
-        // Tạo bảng HTML
-        var table = '<table class="table">';
-        // Duyệt qua từng hàng và tạo các hàng của bảng
-        for (var i = 0; i < rows.length; i++) {
-            // Split hàng thành các cột
-            var columns = rows[i].split(',');
-            // Bắt đầu một hàng mới trong bảng
-            table += '<tr>';
-            // Duyệt qua từng cột và tạo các ô của hàng
-            for (var j = 0; j < columns.length; j++) {
-                // Tạo ô mới
-                table += '<td>' + columns[j] + '</td>';
-            }
-            // Kết thúc hàng
-            table += '</tr>';
-        }
-        // Kết thúc bảng
-        table += '</table>';
-
-        // Hiển thị bảng trong phần tử có id là "resultTableContainer"
-        $('#resultTableContainer').html(table);
-    }
-
-
 
 </script>
 
