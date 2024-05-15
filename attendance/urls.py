@@ -28,7 +28,7 @@ urlpatterns = [
     path('manage/', views.manage , name = 'manage'),
     path('cardselect/', views.card , name = 'card'),
     path('cardedit/', views.edit , name = 'cardedit'),
-
+    path('download-excel/', views.download_student_data, name='download_excel'),
     path('cardadd/', views.add , name = 'cardadd'),
     path("card-id/<int:pk>/",views.CardUidDetailApiView,name="card-uid-Detail"),
     path("card-delete/<int:pk>/",views.delete,name="card-delete"),

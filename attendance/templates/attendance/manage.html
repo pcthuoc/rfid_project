@@ -8,11 +8,16 @@
         <h1 class="mt-4">Quản lý sinh viên</h1>
     </div>
     <div class="ms-auto mt-4">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+            data-bs-target="#uploadModal">Upload</button>
+
+        <button type="button" id="download-excel-btn" class="btn btn-success">Tải dữ liệu Excel</button>
         <button type="button " class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#CreateFormModal"
             id="CreateDevice">
-            Add Card ID
+            Thêm sinh viên
         </button>
     </div>
+
 </div>
 
 
@@ -57,8 +62,7 @@
                         <button class="edit-btn btn btn-primary btn-xs" type="button"
                             data-user-card-id="{{ user.card_id }}" data-user-name="{{ user.name }}"
                             data-user-masv="{{ user.masv }}" data-user-phone="{{ user.phone }}"
-                            data-user-sex="{{ user.sex }}" data-user-email="{{ user.email }}"
-                            data-user-birth_date="{{ user.birth_date }}">Edit</button>
+                            data-user-sex="{{ user.sex }}" data-user-email="{{ user.email }}">Edit</button>
                         <button class="btn btn-danger btn-xs" type="button"
                             onclick="removeItem('{{ user.card_id }}')">Delete</button>
                     </td>
@@ -71,6 +75,33 @@
         </table>
     </div>
 </div>
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadModalLabel">Upload File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Form để upload file -->
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="fileInput" class="form-label">Chọn tệp:</label>
+                        <input class="form-control" type="file" id="fileInput" name="file">
+                    </div>
+                </form>
+                <div id="resultTableContainer"></div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 
 
 <!-- Create Modal -->
@@ -104,10 +135,7 @@
                         <label for="recipient-name" class="col-form-label">Email:</label>
                         <input type="text" class="form-control" name="email">
                     </div>
-                    <div class="mb-3">
-                        <label for="recipient-name" class="col-form-label">Ngày sinh:</label>
-                        <input type="date" class="form-control" name="birth_date">
-                    </div>
+
 
                     <div class="mb-3">
                         <label for="gender" class="col-form-label">Giới tính:</label>
@@ -163,10 +191,7 @@
                         <label for="recipient-name" class="col-form-label">Email:</label>
                         <input type="text" class="form-control" name="email">
                     </div>
-                    <div class="mb-3">
-                        <label for="recipient-name" class="col-form-label">Ngày sinh:</label>
-                        <input type="date" class="form-control" name="birth_date">
-                    </div>
+
 
                     <div class="mb-3">
                         <label for="gender" class="col-form-label">Giới tính:</label>
@@ -197,7 +222,7 @@
 
 <!-- Đoạn mã JavaScript -->
 <script>
-$(document).ready(function () {
+    $(document).ready(function () {
         // Hàm tiền xử lý khi nhấn nút "Thêm"
         function handleSubmit() {
             // Lấy giá trị từ các trường input
@@ -206,23 +231,23 @@ $(document).ready(function () {
             var masv = $('input[name="masv"]').val();
             var phone = $('input[name="phone"]').val();
             var email = $('input[name="email"]').val();
-            var birth_date = $('input[name="birth_date"]').val();
+
             var sex = $('select[name="sex"]').val();
-            
+
             // Kiểm tra xem các trường có rỗng không
-            if (!name || !card_id || !masv || !phone || !email || !birth_date || !sex) {
+            if (!name || !card_id || !masv || !phone || !email || !sex) {
                 // Hiển thị modal thông báo lỗi
                 $('#errorModalBody').text('Vui lòng điền đầy đủ thông tin.');
                 $('#errorModal').modal('show');
                 return false; // Ngăn chặn hành động mặc định của form
             }
-            
+
             // Nếu không có lỗi, tiếp tục thực hiện hành động mặc định của form
             return true;
         }
-        
+
         // Gắn hàm handleSubmit vào sự kiện khi nhấn nút "Thêm"
-        $('#create-button').click(function() {
+        $('#create-button').click(function () {
             return handleSubmit();
         });
     });
@@ -239,36 +264,26 @@ $(document).ready(function () {
             var sex = $(this).data('user-sex');
             var email = $(this).data('user-email');
             console.log(email);
-            var birth_date = $(this).data('user-birth_date');
+
 
             // Gọi hàm để điền dữ liệu vào form chỉnh sửa
-            fillEditForm(cardId, name, masv, phone, sex, email, birth_date);
+            fillEditForm(cardId, name, masv, phone, sex, email);
             // Mở modal chỉnh sửa
             $('#EditFormModal').modal('show');
         });
 
         // Hàm điền dữ liệu vào form chỉnh sửa
-        function fillEditForm(cardId, name, masv, phone, sex, email, birth_date) {
-    // Điền dữ liệu vào các trường nhập của form chỉnh sửa
-    $('#EditFormModal').find('input[name="card_id"]').val(cardId);
-    $('#EditFormModal').find('input[name="name"]').val(name === 'None' ? '' : name);
-    $('#EditFormModal').find('input[name="masv"]').val(masv === 'None' ? '' : masv);
-    $('#EditFormModal').find('input[name="phone"]').val(phone === 'None' ? '' : phone);
-    $('#EditFormModal').find('select[name="sex"]').val(sex === 'None' ? '' : sex);
-    $('#EditFormModal').find('input[name="email"]').val(email === 'None' ? '' : email);
-    
-    // Kiểm tra giá trị của birth_date trước khi chuyển đổi
-    if (birth_date && birth_date !== 'None') {
-        var birthDate = new Date(birth_date);
-        // Định dạng lại ngày tháng theo yêu cầu của trường input type="date"
-        var formattedBirthDate = birthDate.toISOString().split('T')[0];
-        $('#EditFormModal').find('input[name="birth_date"]').val(formattedBirthDate);
-    } else {
-        // Nếu birth_date là None, không cần thực hiện việc chuyển đổi
-        // Bạn có thể thực hiện xử lý khác tại đây nếu cần
-        console.log('Ngày sinh không có hoặc không hợp lệ');
-    }
-}
+        function fillEditForm(cardId, name, masv, phone, sex, email) {
+            // Điền dữ liệu vào các trường nhập của form chỉnh sửa
+            $('#EditFormModal').find('input[name="card_id"]').val(cardId);
+            $('#EditFormModal').find('input[name="name"]').val(name === 'None' ? '' : name);
+            $('#EditFormModal').find('input[name="masv"]').val(masv === 'None' ? '' : masv);
+            $('#EditFormModal').find('input[name="phone"]').val(phone === 'None' ? '' : phone);
+            $('#EditFormModal').find('select[name="sex"]').val(sex === 'None' ? '' : sex);
+            $('#EditFormModal').find('input[name="email"]').val(email === 'None' ? '' : email);
+
+
+        }
 
     });
     function removeItem(id) {
@@ -292,7 +307,70 @@ $(document).ready(function () {
                 });
         }
 
+    } function handleFile(file) {
+        // Tạo một FileReader
+        var reader = new FileReader();
+
+        // Định nghĩa hàm xử lý khi đọc tệp hoàn tất
+        reader.onload = function (event) {
+            // Đọc dữ liệu từ tệp
+            var data = event.target.result;
+            // Xử lý dữ liệu và hiển thị trong bảng
+            processData(data);
+        };
+
+        // Đọc tệp dưới dạng văn bản
+        reader.readAsText(file);
     }
+
+    $(document).ready(function () {
+        $('#download-excel-btn').click(function () {
+            $.ajax({
+                url: "{% url 'download_excel' %}",
+                type: 'GET',
+                success: function (data) {
+                    // Redirect trình duyệt đến URL của tệp Excel
+                    window.location = "{% url 'download_excel' %}";
+                },
+                error: function (xhr, status, error) {
+                    alert('Đã xảy ra lỗi khi tải xuống dữ liệu Excel.');
+                }
+            });
+        });
+    });
+    $(document).ready(function () {
+        // Sự kiện nghe khi tệp được chọn
+        $('#fileInput').change(function (event) {
+            // Đọc tệp khi có sự thay đổi
+            handleFile(event.target.files[0]);
+        });
+    });
+    function processData(data) {
+        // Split dữ liệu thành các hàng
+        var rows = data.split('\n');
+        // Tạo bảng HTML
+        var table = '<table class="table">';
+        // Duyệt qua từng hàng và tạo các hàng của bảng
+        for (var i = 0; i < rows.length; i++) {
+            // Split hàng thành các cột
+            var columns = rows[i].split(',');
+            // Bắt đầu một hàng mới trong bảng
+            table += '<tr>';
+            // Duyệt qua từng cột và tạo các ô của hàng
+            for (var j = 0; j < columns.length; j++) {
+                // Tạo ô mới
+                table += '<td>' + columns[j] + '</td>';
+            }
+            // Kết thúc hàng
+            table += '</tr>';
+        }
+        // Kết thúc bảng
+        table += '</table>';
+
+        // Hiển thị bảng trong phần tử có id là "resultTableContainer"
+        $('#resultTableContainer').html(table);
+    }
+
 
 
 </script>

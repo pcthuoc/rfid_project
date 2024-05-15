@@ -1,10 +1,18 @@
+import csv
+import xlwt
 from django.shortcuts import get_object_or_404, render
+from rest_framework import generics
+from rest_framework.parsers import MultiPartParser
+
+from django.utils.encoding import smart_str
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from .models import Student, Log
 from django.shortcuts import redirect
 import datetime
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+import xlsxwriter
+
 
 global stat
 stat = ''
@@ -149,16 +157,8 @@ def add(request):
     masv = request.POST.get('masv')
     phone = request.POST.get('phone')
     email = request.POST.get('email')
-    birth_date = request.POST.get('birth_date')
     sex = request.POST.get('sex')
-    
-    # Kiểm tra xem các trường dữ liệu cần thiết đã được điền đầy đủ chưa
-    if not all([name, card_id, masv, phone, email, birth_date, sex]):
-        return HttpResponseBadRequest('Vui lòng điền đầy đủ thông tin.')
-    
-    # Kiểm tra xem trường birth_date có được nhập không
-    if not birth_date:
-        return HttpResponseBadRequest('Vui lòng nhập ngày sinh.')
+
     
     # Tạo một đối tượng Student mới và lưu vào cơ sở dữ liệu
     new_student = Student(
@@ -167,7 +167,6 @@ def add(request):
         masv=masv,
         phone=phone,
         email=email,
-        birth_date=birth_date,
         sex=sex
     )
     new_student.save()
@@ -184,7 +183,6 @@ def edit(request):
     student.masv = request.POST.get('masv')
     student.phone = request.POST.get('phone')
     student.email = request.POST.get('email')
-    student.birth_date = request.POST.get('birth_date')
     student.sex = request.POST.get('sex')
     
    
@@ -210,8 +208,39 @@ def search(request):
 	dataset = {'use': sel_user, 'log': logf}
 	return render(request, 'attendance/search.html', dataset)
 
-
-
+def download_student_data(request):
+    # content-type of response
+    response = HttpResponse(content_type='application/ms-excel')
+    # decide file name
+    response['Content-Disposition'] = 'attachment; filename="StudentData.xls"'
+    # creating workbook
+    wb = xlwt.Workbook(encoding='utf-8')
+    # adding sheet
+    ws = wb.add_sheet("Student Data")
+    # Sheet header, first row
+    row_num = 0
+    font_style = xlwt.XFStyle()
+    # headers are bold
+    font_style.font.bold = True
+    # column header names
+    columns = ['ID', 'Name', 'MASV', 'Phone', 'Sex', 'Email']
+    # write column headers in sheet
+    for col_num in range(len(columns)):
+        ws.write(row_num, col_num, columns[col_num], font_style)
+    # Sheet body, remaining rows
+    font_style = xlwt.XFStyle()
+    # get student data from the database
+    students = Student.objects.all()
+    for student in students:
+        row_num += 1
+        ws.write(row_num, 0, student.card_id, font_style)
+        ws.write(row_num, 1, student.name, font_style)
+        ws.write(row_num, 2, student.masv, font_style)
+        ws.write(row_num, 3, student.phone, font_style)
+        ws.write(row_num, 4, student.sex, font_style)
+        ws.write(row_num, 5, student.email, font_style)
+    wb.save(response)
+    return response
 
 def delete(request,pk):
     
@@ -230,6 +259,7 @@ def CardUidDetailApiView(request, pk):
 			'masv': student.masv,
 			'sex': student.sex,
 			'email':student.email,
-			'birth_date':student.birth_date
+
 			
 		})
+        
