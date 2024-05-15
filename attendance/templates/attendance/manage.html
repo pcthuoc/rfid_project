@@ -75,8 +75,8 @@
         </table>
     </div>
 </div>
-<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade custom-modal-xl" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="uploadModalLabel">Upload File</h5>
@@ -90,18 +90,17 @@
                         <input class="form-control" type="file" id="fileInput" name="file">
                     </div>
                 </form>
-                <div id="resultTableContainer"></div>
-
+                <div id="resultTableContainer" class="table-responsive">
+                    <!-- Bảng sẽ được tạo ra ở đây -->
+                </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" id="updateDataBtn">Update</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
 </div>
-
-
-
 
 
 <!-- Create Modal -->
@@ -253,6 +252,7 @@
     });
 
     const csrftoken = "{{ csrf_token }}";
+    var data;
     $(document).ready(function () {
 
         $('.edit-btn').click(function () {
@@ -338,56 +338,106 @@
             });
         });
     });
-    // Thêm sự kiện cho nút "Upload"
-$('#uploadForm').submit(function (event) {
-    event.preventDefault(); // Ngăn chặn hành động mặc định của form
-
-    // Lấy dữ liệu từ trường input file
-    var file = $('#fileInput')[0].files[0];
-
-    // Xử lý tệp được chọn
-    handleFile(file);
-});
-
-// Sự kiện nghe khi trường input tệp thay đổi
-$('#fileInput').change(function (event) {
-    // Đọc tệp khi có sự thay đổi
-    handleFile(event.target.files[0]);
-});
-
-// Đoạn mã JavaScript tiếp theo (processData, etc.) vẫn được giữ nguyên
-
-document.getElementById('fileInput').addEventListener('change', function(event) {
-        // Lấy tệp đã chọn
+    $('#fileInput').change(function (event) {
         var file = event.target.files[0];
-        
-        // Tạo một FormData object để chứa dữ liệu của form
         var formData = new FormData();
-        // Thêm tệp đã chọn vào FormData object
         formData.append('file', file);
 
-        // Sử dụng fetch API để gửi yêu cầu POST đến máy chủ với dữ liệu FormData
-        fetch('/upload-excel/', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.text(); // hoặc response.json() nếu server trả về JSON
-            } else {
-                throw new Error('Có lỗi xảy ra khi upload tệp.');
+        $.ajax({
+            url: '/upload-excel/',
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    data = response.data;
+                    var tableHtml = '<table class="table">';
+                    // Thêm header của bảng
+                    tableHtml += '<thead><tr>';
+                    for (var i = 0; i < data[0].length; i++) {
+                        tableHtml += '<th>' + data[0][i] + '</th>';
+                    }
+                    tableHtml += '</tr></thead>';
+
+                    // Thêm dữ liệu của bảng
+                    tableHtml += '<tbody>';
+                    for (var i = 1; i < data.length; i++) {
+                        tableHtml += '<tr>';
+                        for (var j = 0; j < data[i].length; j++) {
+                            tableHtml += '<td>' + data[i][j] + '</td>';
+                        }
+                        tableHtml += '</tr>';
+                    }
+                    tableHtml += '</tbody>';
+
+                    tableHtml += '</table>';
+
+                    // Chèn bảng vào phần tử HTML tương ứng trong modal
+                    $('#resultTableContainer').html(tableHtml);
+                } else {
+                    alert('Có lỗi xảy ra: ' + response.error_message);
+                }
+            },
+            error: function (xhr, status, error) {
+                alert('Có lỗi xảy ra: ' + error);
             }
-        })
-        .then(data => {
-            // Hiển thị kết quả từ server trong phần tử có id là "resultTableContainer"
-            document.getElementById('resultTableContainer').innerHTML = data;
-        })
-        .catch(error => {
-            // Xử lý lỗi nếu có
-            console.error('Error:', error);
         });
     });
+    $('#updateDataBtn').click(function() {
+    // Kiểm tra xem biến data đã được định nghĩa chưa
+    if (typeof data !== 'undefined') {
+        // Loại bỏ hàng đầu tiên (tiêu đề)
+        var dataToSend = data.slice(1);
+
+        // Gửi dữ liệu JSON đến server để update Student
+        $.ajax({
+            url: '/update-student/',
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            data: JSON.stringify(dataToSend), // Gửi dữ liệu JSON dưới dạng chuỗi
+            contentType: 'application/json', // Đặt kiểu nội dung của yêu cầu là JSON
+            success: function (response) {
+                // Kiểm tra xem phản hồi từ server có thành công hay không
+                if (response.success) {
+                    // Nếu thành công, reload trang "manage"
+                    window.location.href = '/manage';
+                } else {
+                    // Nếu có lỗi, hiển thị thông báo lỗi
+                    console.error(response.error_message);
+                }
+            },
+            error: function (xhr, status, error) {
+                // Xử lý lỗi (nếu có)
+                console.error(error);
+            }
+        });
+    } else {
+        console.error('Biến data chưa được định nghĩa.');
+    }
+});
+
+
 
 </script>
 
+{% endblock %}
+
+{% block css %}
+<!-- CSS -->
+<style>
+    /* CSS cho modal */
+    .custom-modal-xl {
+        max-width: 90%;
+    }
+    #resultTableContainer {
+    max-height: 400px; /* Đặt chiều cao tối đa của container */
+    overflow-y: auto; /* Kích hoạt thanh cuộn dọc khi nội dung vượt quá chiều cao tối đa */
+}
+</style>
 {% endblock %}

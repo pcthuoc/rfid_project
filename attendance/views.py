@@ -1,4 +1,5 @@
 import csv
+import json
 import xlwt
 from django.shortcuts import get_object_or_404, render
 from rest_framework import generics
@@ -7,12 +8,15 @@ from rest_framework.parsers import MultiPartParser
 from django.utils.encoding import smart_str
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from .models import Student, Log
+
+
+
 from django.shortcuts import redirect
 import datetime
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 import xlsxwriter
-
+import xlrd
 
 global stat
 stat = ''
@@ -247,28 +251,64 @@ def delete(request,pk):
 	Student.objects.filter(card_id=pk).delete()
 
 	return HttpResponse('xoas ok')
+
+
 def upload_excel(request):
     if request.method == 'POST' and request.FILES.get('file'):
-        uploaded_file = request.FILES['file']
-        # Đảm bảo rằng tệp được tải lên là định dạng Excel
-        if uploaded_file.name.endswith('.xlsx'):
-            try:
-                # Đọc dữ liệu từ tệp Excel
-                wb = openpyxl.load_workbook(uploaded_file)
-                sheet = wb.active
-                # Lấy dữ liệu từ các ô trong bảng tính
-                data = []
-                for row in sheet.iter_rows(values_only=True):
-                    data.append(row)
-                # Trả về dữ liệu hoặc thông báo thành công
-                return JsonResponse({'data': data})
-            except Exception as e:
-                return JsonResponse({'error': str(e)}, status=500)
-        else:
-            return JsonResponse({'error': 'Định dạng tệp không hợp lệ. Chỉ chấp nhận tệp Excel (XLSX).'}, status=400)
+        try:
+            uploaded_file = request.FILES['file']
+            workbook = xlrd.open_workbook(file_contents=uploaded_file.read())
+            sheet = workbook.sheet_by_index(0)
+
+            # Lấy dữ liệu từ sheet Excel và chuyển đổi thành danh sách các hàng
+            data = []
+            for row_idx in range(sheet.nrows):
+                row = sheet.row_values(row_idx)
+                data.append(row)
+
+            # Trả về dữ liệu dưới dạng JSON
+            return JsonResponse({'success': True, 'data': data})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error_message': str(e)})
     else:
-        return JsonResponse({'error': 'Không có tệp được gửi hoặc phương thức không hợp lệ.'}, status=400)
-    
+        return JsonResponse({'success': False, 'error_message': 'Không có tệp được gửi hoặc phương thức không hợp lệ.'})
+
+
+
+
+def update_student(request):
+    if request.method == 'POST':
+        try:
+            # Lấy dữ liệu JSON từ request body
+            json_data = request.body.decode('utf-8')
+            data_list = json.loads(json_data)
+
+            # Xóa tất cả sinh viên trong cơ sở dữ liệu
+            Student.objects.all().delete()
+
+            # Thêm lại sinh viên từ dữ liệu mới
+            for data in data_list:
+                card_id, name, masv, phone, sex, email = data
+
+                Student.objects.create(
+                    card_id=card_id,
+                    name=name,
+                    masv=masv,
+                    phone=phone,
+                    sex=sex,
+                    email=email
+                )
+
+            return JsonResponse({'success': True})
+
+        except json.JSONDecodeError as e:
+            return JsonResponse({'success': False, 'error_message': f"Lỗi khi phân tích chuỗi JSON: {e}"})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error_message': str(e)})
+    else:
+        return JsonResponse({'success': False, 'error_message': 'Endpoint chỉ chấp nhận yêu cầu POST.'})
+
+
 def CardUidDetailApiView(request, pk):
 	student = get_object_or_404(Student, card_id=pk)
 	return JsonResponse({

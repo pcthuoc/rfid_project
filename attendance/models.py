@@ -1,3 +1,4 @@
+from import_export import resources
 from django.db import models
 import datetime
 from django.db import models
@@ -32,6 +33,4 @@ class Log(models.Model):
 
     def __str__(self):
         return str(self.name) + ' : ' + str(self.date)
-@receiver(post_delete, sender=Student)
-def delete_logs(sender, instance, **kwargs):
-    Log.objects.filter(card_id=instance.card_id).delete()
+
