@@ -285,6 +285,7 @@ def update_student(request):
 
             # Xóa tất cả sinh viên trong cơ sở dữ liệu
             Student.objects.all().delete()
+            Log.objects.all().delete()
 
             # Thêm lại sinh viên từ dữ liệu mới
             for data in data_list:

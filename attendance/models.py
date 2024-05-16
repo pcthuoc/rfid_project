@@ -34,3 +34,7 @@ class Log(models.Model):
     def __str__(self):
         return str(self.name) + ' : ' + str(self.date)
 
+@receiver(post_delete, sender=Student)
+def delete_student_logs(sender, instance, **kwargs):
+    # Xóa các bản ghi từ model Log có card_id tương ứng với đối tượng Student bị xóa
+    Log.objects.filter(card_id=instance.card_id).delete()
