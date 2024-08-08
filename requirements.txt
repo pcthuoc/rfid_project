@@ -1,3 +1,11 @@
-Django==2.2.2
-channels==3.0.4
-channels_redis==3.3.1
+Django>=3.0,<4.0
+channels
+daphne
+xlrd>=2.0.0
+openpyxl
+channels_redis
+djangorestframework
+xlsxwriter
+django-import-export
+whitenoise
+xlwt
