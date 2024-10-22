@@ -25,6 +25,7 @@ urlpatterns = [
     path('update_finger_id/', views.update_finger_id_via_url, name='update_finger_id_via_url'),  # update lại vân tay mới
     path('process/', views.process, name='process'),# điểm danh 
     path('getid/', views.getid, name='getid'),# lấy id điểm danh
+    path('download_logs/', views.download_logs, name='download_logs'),
 
     path('upload-excel/', views.upload_excel, name='upload_excel'),
     path('save-uploaded-data/', views.save_uploaded_data, name='save_uploaded_data'),

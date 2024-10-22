@@ -2,14 +2,19 @@
 
 {% block title %}Attendance Home{% endblock %}
 
-{% block css %}
-{% endblock %}
+{% block css %}{% endblock %}
 
 {% block body %}
+<div class="d-flex">
+  <div>
+      <h1 class="mt-4">Danh sách điểm danh</h1>
+  </div>
+  <div class="ms-auto mt-4">
+      <button type="button" id="download-excel-btn" class="btn btn-success">Tải dữ liệu Excel</button>
+  </div>
+</div>
+
 <div class="container-fluid text-center">
-  <br>
-  <h1 class="mt-4">Danh sách điểm danh</h1>
-  <br>
   <div class="table-responsive" style="height: 100%;">
     <table class="table">
       <thead class="table-dark">
@@ -24,13 +29,13 @@
       <tbody>
         {% for log in logs %}
         <tr>
-          <td>{{ log.student.name }}</td> <!-- Họ tên sinh viên -->
-          <td>{{ log.student.masv }}</td> <!-- Mã sinh viên -->
-          <td>{{ log.student.class_name }}</td> <!-- Lớp -->
-          <td>{{ log.time_in|date:"H:i:s d/m/Y" }}</td> <!-- Thời gian check-in -->
+          <td>{{ log.student.name }}</td>
+          <td>{{ log.student.masv }}</td>
+          <td>{{ log.student.class_name }}</td>
+          <td>{{ log.time_in|date:"H:i:s d/m/Y" }}</td>
           <td>
             {% if log.time_out %}
-            {{ log.time_out|date:"H:i:s d/m/Y" }} <!-- Thời gian check-out (nếu có) -->
+            {{ log.time_out|date:"H:i:s d/m/Y" }}
             {% else %}
             Chưa check-out
             {% endif %}
@@ -38,13 +43,11 @@
         </tr>
         {% endfor %}
       </tbody>
-      </tbody>
     </table>
   </div>
 </div>
-
-
 {% endblock %}
+
 {% block js %}
 <script>
   $(document).ready(function () {
@@ -66,18 +69,20 @@
     ws.onmessage = (event) => {
       // Khi nhận được tin nhắn từ WebSocket, gửi yêu cầu AJAX để cập nhật bảng
       $.ajax({
-        url: "{% url 'index' %}",  // Thay thế 'relay' bằng URL xử lý cập nhật bảng của bạn
+        url: "{% url 'index' %}",
         method: 'GET',
       }).done(function (data) {
         const $data = $(data);
-        // Cập nhật nội dung bảng với dữ liệu mới
         $('table tbody').html($data.find('table tbody').html());
       }).fail(function (xhr, status, error) {
         console.error('Lỗi khi tải dữ liệu: ', error);
       });
     };
+
+    // Thêm sự kiện cho nút tải Excel
+    $('#download-excel-btn').on('click', function () {
+      window.location.href = "{% url 'download_logs' %}";
+    });
   });
 </script>
-
-
 {% endblock %}

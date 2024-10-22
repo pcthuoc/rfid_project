@@ -4,7 +4,7 @@ import xlwt
 import xlrd
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-
+import openpyxl
 from django.shortcuts import get_object_or_404, render
 from rest_framework import generics
 from rest_framework.parsers import MultiPartParser
@@ -184,6 +184,34 @@ def update_finger_id_via_url(request):
     except Student.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Student not found'}, status=404)
 
+
+def download_logs(request):
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.title = 'Logs'
+
+    headers = [ 'Họ Tên', 'Lớp','Mã SV', 'Ngày', 'Giờ Vào', 'Giờ Ra']
+    sheet.append(headers)
+
+    logs = Log.objects.select_related('student')
+
+    for log in logs:
+        sheet.append([
+            log.student.name,
+            log.student.class_name,
+            log.student.masv,
+            log.date.strftime('%Y-%m-%d'),
+            log.time_in.strftime('%H:%M:%S'),
+            log.time_out.strftime('%H:%M:%S') if log.time_out else '',
+
+        ])
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="logs.xlsx"'
+    workbook.save(response)
+
+    return response
+
 def card(request):
 	sel_user = ''
 	users = Student.objects.all().order_by('id')
@@ -252,22 +280,27 @@ def edit_student(request, student_id):
         
         return redirect('/manage')  # Chuyển hướng về trang quản lý sinh viên
 def search(request):
-	sel_user = ''
-	users = Student.objects.all()
-	logs = Log.objects.all()
-	path = request.get_full_path()
-	card_id = request.POST.get('search').strip() if request.POST.get('search') else None
+    sel_user = None  # Khởi tạo giá trị rỗng cho sinh viên được chọn
+    logf = []  # Danh sách các log tìm thấy
+    path = request.get_full_path()
 
-	logf = []
-	for user in users:
-		if str(user.card_id) == str(card_id):
-			sel_user = user
-	logf = Log.objects.filter(card_id=card_id)
+    # Lấy giá trị tìm kiếm từ form (nếu có)
+    masv = request.POST.get('search', '').strip() if request.POST.get('search') else None
 
-		
-	dataset = {'use': sel_user, 'log': logf}
-	return render(request, 'attendance/search.html', dataset)
+    if masv:
+        try:
+            # Tìm sinh viên theo mã sinh viên
+            sel_user = Student.objects.get(masv=masv)
+            # Lấy tất cả các log liên quan đến sinh viên này
+            logf = Log.objects.filter(student=sel_user)
+        except Student.DoesNotExist:
+            # Nếu không tìm thấy sinh viên, trả về logf rỗng
+            sel_user = None
+            logf = []
 
+    # Chuẩn bị dữ liệu để gửi tới template
+    dataset = {'use': sel_user, 'log': logf}
+    return render(request, 'attendance/search.html', dataset)
 def download_student_data(request):
     # content-type of response
     response = HttpResponse(content_type='application/ms-excel')

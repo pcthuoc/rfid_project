@@ -6,7 +6,7 @@
 
 <div class="container-fluid" style="margin-bottom: 100px;">
   <div class="row" style="margin-top: 50px;">
-    <div class="col-7 my-2">
+    <div class="col-6 my-2">
       <div class="card"style="margin-bottom: 200px;">
         <div class="card-header bg-dark text-white" style="margin-bottom: 10px;">
           <h5 class="card-title">Thông tin thẻ sinh viên</h5>
@@ -16,7 +16,6 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
-                    <p><strong>ID thẻ:</strong> {{ use.card_id }}</p>
                     <p><strong>Tên:</strong> {{ use.name }}</p>
                     <p><strong>Mã sinh viên:</strong> {{ use.masv }}</p>
                     <p><strong>Số điện thoại:</strong> {{ use.phone }}</p>
@@ -33,7 +32,6 @@
                 </p>
                 
                     <p><strong>Email:</strong> {{ use.email }}</p>
-                    <p><strong>Ngày sinh:</strong> {{ use.birth_date }}</p>
                 </div>
             </div>
            
@@ -41,38 +39,38 @@
     </div>
     
     </div>
-    <div class="col-5 text-center">
+
+    <div class="col-6 text-center">
       <br>
       <h1 class="mt-4">Lịch sử điểm danh</h1>
       <br>
       <div class="table-responsive" style="height: 100%;">
-     
-
         <table class="table">
           <thead class="table-dark">
             <tr>
-              <th>Ngày</th>
-              <th>Thời gian checkin</th>
-              <th>Thời gian checkout</th>
+              <th>Check-in</th>
+              <th>Check-out</th>
             </tr>
           </thead>
           <tbody>
             {% for entry in log %}
             <tr>
-              <td>{{ entry.date }}</td>
-              <td>{{ entry.time_in }}</td>
+              <!-- Hiển thị ngày giờ check-in -->
+              <td>{{ entry.time_in|date:"H:i:s d/m/Y" }}</td>
+    
+              <!-- Kiểm tra và hiển thị ngày giờ check-out nếu có -->
               {% if entry.time_out %}
-            <td>{{ entry.time_out }}</td>
-            {% else %}
-            <td>&nbsp;</td> <!-- Giá trị trống -->
-            {% endif %}
+                <td>{{ entry.time_out|date:"H:i:s d/m/Y" }}</td>
+              {% else %}
+                <td>Chưa check-out</td>
+              {% endif %}
             </tr>
             {% endfor %}
           </tbody>
         </table>
-
       </div>
     </div>
+    
   </div>
 </div>
 

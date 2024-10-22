@@ -20,7 +20,8 @@
 <body class="sb-nav-fixed">
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
         <!-- Navbar Brand-->
-        <a class="navbar-brand ps-3" href="{% url 'index' %}">RFID <span class="text-white">Smart</span> Reader </a>
+        <a class="navbar-brand ps-3" href="{% url 'index' %}">Điểm Danh Vân Tay</a>
+
 
         <!-- Sidebar Toggle-->
         <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i
@@ -35,7 +36,7 @@
                     aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
 
-                    <li><a class="dropdown-item" href="/logout/">Logout</a></li>
+                    <li><a class="dropdown-item" href="/logout/">Đăng xuất</a></li>
 
 
 
@@ -67,7 +68,7 @@
                             style="margin-right: 15px; margin-left: 15px;">{% csrf_token %}
                             <div class="input-group justify-content-between">
                                 <input class="form-control mr-sm-2" name="search" type="search"
-                                placeholder="Search by ID" aria-label="Search">
+                                placeholder="Tìm kiếm theo mã sinh viên" aria-label="Search">
                                 <div class="input-group-append">
                                     <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
                                 </div>
@@ -81,7 +82,7 @@
                 </div>
                 {% block sidebar_link %}{% endblock %}
                 <div class="sb-sidenav-footer">
-                    <div class="small">Logged in as:</div>
+                    <div class="small">Tài khoản đăng nhập:</div>
                     {{request.user}}
                 </div>
             </nav>
@@ -93,18 +94,6 @@
                     {% block body %}{% endblock %}
                 </div>
             </main>
-            <!-- <footer class="py-4 bg-light mt-auto">
-                <div class="container-fluid px-4">
-                    <div class="d-flex align-items-center justify-content-between small">
-                        <div class="text-muted">Copyright &copy; Your Website 2021</div>
-                        <div>
-                            <a href="#">Privacy Policy</a>
-                            &middot;
-                            <a href="#">Terms &amp; Conditions</a>
-                        </div>
-                    </div>
-                </div>
-            </footer> -->
         </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
