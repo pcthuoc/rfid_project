@@ -20,19 +20,21 @@ from . import views
 urlpatterns = [
     path('', views.index , name = 'index'),
     path('home/', views.index , name = 'index'),
-    path('anujnjbxhabnajnxnixtry/', views.index1 , name = 'index1'),
-    path('aujnjmciejidwwwenixasi/', views.manage1 , name = 'manage1'),
-    path('aujnjmciejidncjeiuwcni/', views.details1 , name = 'details1'),
-    path('process/', views.process, name = 'process'),
-    path('users/', views.details, name = 'details'),
     path('manage/', views.manage , name = 'manage'),
-    path('cardselect/', views.card , name = 'card'),
-    path('cardedit/', views.edit , name = 'cardedit'),
-    path('download-excel/', views.download_student_data, name='download_excel'),
-    path('cardadd/', views.add , name = 'cardadd'),
+    path('users/', views.alluser, name = 'alluser'),
+    path('update_finger_id/', views.update_finger_id_via_url, name='update_finger_id_via_url'),  # update lại vân tay mới
+    path('process/', views.process, name='process'),# điểm danh 
+    path('getid/', views.getid, name='getid'),# lấy id điểm danh
+
     path('upload-excel/', views.upload_excel, name='upload_excel'),
-    path('update-student/', views.update_student, name='update_student'),
+    path('save-uploaded-data/', views.save_uploaded_data, name='save_uploaded_data'),
+    path('edit-student/<int:student_id>/', views.edit_student, name='edit_student'),
+    path('card-delete/<int:id>/', views.card_delete, name='card_delete'),
+    path('download-excel/', views.download_student_data, name='download_excel'),
+
+    path('cardselect/', views.card , name = 'card'),
+   
+    path('cardadd/', views.add , name = 'cardadd'),
     path("card-id/<int:pk>/",views.CardUidDetailApiView,name="card-uid-Detail"),
-    path("card-delete/<int:pk>/",views.delete,name="card-delete"),
     path('searchuser/', views.search , name = 'search'),
 ]

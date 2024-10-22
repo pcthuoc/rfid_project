@@ -14,55 +14,70 @@
     <table class="table">
       <thead class="table-dark">
         <tr>
-          <th scope="col">#</th>
-          <th scope="col">Họ tên</th>
-          <th scope="col">CardID</th>
-          <th scope="col">Số điện thoại</th>
-          <th scope="col">Mã sinh viên</th>
-          <th scope="col">Thời gian checkin</th>
-          <th scope="col">Thời gian checkout</th>
+          <th scope="col">Họ Tên</th>
+          <th scope="col">Mã Sinh Viên</th>
+          <th scope="col">Lớp</th>
+          <th scope="col">Check-in</th>
+          <th scope="col">Check-out</th>
         </tr>
       </thead>
-      <tbody id="cards" class="cards">
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td>{{ log.student.name }}</td> <!-- Họ tên sinh viên -->
+          <td>{{ log.student.masv }}</td> <!-- Mã sinh viên -->
+          <td>{{ log.student.class_name }}</td> <!-- Lớp -->
+          <td>{{ log.time_in|date:"H:i:s d/m/Y" }}</td> <!-- Thời gian check-in -->
+          <td>
+            {% if log.time_out %}
+            {{ log.time_out|date:"H:i:s d/m/Y" }} <!-- Thời gian check-out (nếu có) -->
+            {% else %}
+            Chưa check-out
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
       </tbody>
     </table>
   </div>
 </div>
+
+
 {% endblock %}
 {% block js %}
 <script>
   $(document).ready(function () {
-    const socket = new WebSocket('ws://152.42.243.189:8000/ws/notifications/');
-    socket.onmessage = function (event) {
-      const data = JSON.parse(event.data);
-      console.log('Notification:', data.message);
-      // Cập nhật dữ liệu trang HTML khi nhận được thông báo
-      loadData();
+    const ws = new WebSocket('ws://' + window.location.host + '/ws/notifications/');
+
+    // Thiết lập sự kiện cho WebSocket
+    ws.onopen = () => {
+      console.log('Kết nối WebSocket đã được thiết lập');
     };
 
-    socket.onopen = function (event) {
-      console.log('WebSocket connected');
+    ws.onerror = (error) => {
+      console.error('Lỗi WebSocket: ', error);
     };
 
-    socket.onclose = function (event) {
-      console.log('WebSocket closed');
+    ws.onclose = () => {
+      console.log('Kết nối WebSocket đã bị đóng');
     };
 
-    socket.onerror = function (error) {
-      console.log('WebSocket error:', error);
-    };
-
-    // Hàm tải dữ liệu ban đầu
-    function loadData() {
+    ws.onmessage = (event) => {
+      // Khi nhận được tin nhắn từ WebSocket, gửi yêu cầu AJAX để cập nhật bảng
       $.ajax({
-        url: "{% url 'index1' %}"
+        url: "{% url 'index' %}",  // Thay thế 'relay' bằng URL xử lý cập nhật bảng của bạn
+        method: 'GET',
       }).done(function (data) {
-        $('#cards').html(data);
+        const $data = $(data);
+        // Cập nhật nội dung bảng với dữ liệu mới
+        $('table tbody').html($data.find('table tbody').html());
+      }).fail(function (xhr, status, error) {
+        console.error('Lỗi khi tải dữ liệu: ', error);
       });
-    }
-
-    // Tải dữ liệu ngay khi trang được tải lần đầu tiên
-    loadData();
+    };
   });
 </script>
+
+
 {% endblock %}

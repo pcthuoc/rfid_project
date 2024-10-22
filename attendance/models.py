@@ -1,40 +1,34 @@
 from import_export import resources
 from django.db import models
-import datetime
-from django.db import models
+from django.utils import timezone
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
-# Create your models here.
+
 class Student(models.Model):
-    card_id = models.IntegerField(unique=True)
+    class_name = models.CharField(max_length=100, blank=True, null=True)
     name = models.CharField(max_length=50, blank=True, null=True)
     masv = models.CharField(max_length=50, blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True, null=True)
     sex = models.CharField(max_length=7, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
-    birth_date = models.DateField(blank=True, null=True) 
+    finger_id = models.IntegerField( default=0)
 
     def __str__(self):
         if self.name is None:
-            return str(self.card_id)
+            return str(self.id)
         else:
-            return str(self.name) + ' : ' + str(self.masv)
+            return f"{self.name} : {self.masv}"
 
 class Log(models.Model):
-    ida = models.IntegerField(default=1)
-    card_id = models.IntegerField()
-    name = models.CharField(max_length=50)
-    phone = models.CharField(max_length=50, blank=True, null=True)
-    masv = models.CharField(max_length=50, blank=True, null=True)
-    date = models.DateField(default=datetime.datetime.now())
-    time_in = models.TimeField(default=datetime.datetime.now())
-    time_out = models.TimeField(blank=True, null=True)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)  # Liên kết với Student
+    date = models.DateTimeField(default=timezone.now)
+    time_in = models.DateTimeField(default=timezone.now)
+    time_out = models.DateTimeField(blank=True, null=True)
     status = models.TextField(max_length=100)
 
     def __str__(self):
-        return str(self.name) + ' : ' + str(self.date)
+        return f"{self.student.name} : {self.date}"
 
 @receiver(post_delete, sender=Student)
 def delete_student_logs(sender, instance, **kwargs):
-    # Xóa các bản ghi từ model Log có card_id tương ứng với đối tượng Student bị xóa
-    Log.objects.filter(card_id=instance.card_id).delete()
+    Log.objects.filter(student=instance).delete()

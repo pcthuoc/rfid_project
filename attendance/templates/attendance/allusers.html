@@ -1,27 +1,189 @@
-    {% for user in users %}
-    {% if user.id %}
-    <TR>
-        <td>{{ forloop.counter }}</td>
-        <TD>{{ user.card_id}}</TD>
-        {% if user.name %}
-        <TD>{{ user.name}}</TD>
-        <TD>{{ user.phone}}</TD>
-        <TD>{{ user.masv}}</TD>
-        <TD>
-            {% if user.sex == "male" %}
-                Nam
-            {% elif user.sex == "female" %}
-                Nữ
-            {% else %}
-                Khác
-            {% endif %}
-        </TD>
-        
-        {% else %}
-        <TD></TD>
-        <TD></TD>
-        <TD></TD>
-        {% endif %}
-    </TR>
-    {% endif %}
-    {% endfor %}
+{% extends 'attendance/basic.html' %}
+
+{% block title %}User Details{% endblock %}
+
+{% block css %}
+<style>
+    /* Căn giữa toàn bộ bảng */
+    .container-fluid {
+        max-width: 90%;
+        margin: 0 auto;
+    }
+
+    /* Style cho bảng */
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    /* Style cho tiêu đề bảng */
+    .table thead th {
+        background-color: #343a40;
+        color: white;
+        text-transform: uppercase;
+        padding: 10px;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    /* Style cho các hàng */
+    .table tbody tr {
+        border-bottom: 1px solid #ddd;
+    }
+
+    /* Style cho các ô trong bảng */
+    .table tbody td {
+        padding: 10px;
+        vertical-align: middle;
+    }
+
+    /* Style cho các link sắp xếp */
+    .table thead th a {
+        color: #007bff;
+        /* Màu xanh lam cho link */
+        text-decoration: none;
+        /* Xóa gạch dưới */
+        transition: color 0.3s;
+        /* Thêm hiệu ứng chuyển màu khi hover */
+    }
+
+    /* Thêm màu sắc khi hover vào link sắp xếp */
+    .table thead th a:hover {
+        color: #0056b3;
+        /* Màu khi hover */
+    }
+
+    /* Style cho hàng lẻ và hàng chẵn để dễ đọc hơn */
+    .table tbody tr:nth-child(odd) {
+        background-color: #f2f2f2;
+    }
+
+    .table tbody tr:hover {
+        background-color: #e9ecef;
+        /* Màu nền khi hover vào hàng */
+    }
+
+    /* Tùy chỉnh thêm cho bảng */
+    .table-responsive {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        /* Thêm bóng đổ cho bảng */
+    }
+
+    /* Style cho nút chỉnh sửa */
+    .edit-btn {
+        color: white;
+        background-color: #28a745;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    /* Style cho nút xóa */
+    .delete-btn {
+        color: white;
+        background-color: #dc3545;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    table a {
+        color: #ffffff !important;
+        text-decoration: none !important;
+        background-color: transparent;
+        /* Thay đổi nếu cần */
+    }
+
+    table a {
+        color: #ffffff !important;
+    }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="container-fluid text-center">
+    <br>
+    <h1 class="mt-4">Danh sách sinh viên</h1>
+    <br>
+    <div class="table-responsive" style="height: 100%;">
+        <table class="table">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">
+                        <a
+                            href="?sort_by=name{% if request.GET.sort_by == 'name' and request.GET.order == 'asc' %}&order=desc{% else %}&order=asc{% endif %}">
+                            Họ tên
+                        </a>
+                    </th>
+                    <th scope="col">
+                        <a
+                            href="?sort_by=class_name{% if request.GET.sort_by == 'class_name' and request.GET.order == 'asc' %}&order=desc{% else %}&order=asc{% endif %}">
+                            Lớp
+                        </a>
+                    </th>
+                    <th scope="col">
+                        <a
+                            href="?sort_by=masv{% if request.GET.sort_by == 'masv' and request.GET.order == 'asc' %}&order=desc{% else %}&order=asc{% endif %}">
+                            Mã sinh viên
+                        </a>
+                    </th>
+                    <th scope="col">
+                        <a
+                            href="?sort_by=phone{% if request.GET.sort_by == 'phone' and request.GET.order == 'asc' %}&order=desc{% else %}&order=asc{% endif %}">
+                            Số điện thoại
+                        </a>
+                    </th>
+                    <th scope="col">
+                        <a
+                            href="?sort_by=sex{% if request.GET.sort_by == 'sex' and request.GET.order == 'asc' %}&order=desc{% else %}&order=asc{% endif %}">
+                            Giới tính
+                        </a>
+                    </th>
+                    <th scope="col">
+                        <a
+                            href="?sort_by=finger_id{% if request.GET.sort_by == 'finger_id' and request.GET.order == 'asc' %}&order=desc{% else %}&order=asc{% endif %}">
+                            Ghi chú
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="userdetails" class="userdetails">
+                {% for user in users %}
+                {% if user.name and user.class_name and user.masv %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.class_name }}</td>
+                    <td>{{ user.masv }}</td>
+                    <td>{{ user.phone|default:"Không có" }}</td>
+                    <td>
+                        {% if user.sex == "male" %}
+                        Nam
+                        {% elif user.sex == "female" %}
+                        Nữ
+                        {% else %}
+                        Khác
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.finger_id == 0 %}
+                        Chưa đăng ký vân tay
+                        {% else %}
+                        Đã đăng ký vân tay
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endblock body %}
